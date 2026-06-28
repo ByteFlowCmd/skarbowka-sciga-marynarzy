@@ -1,0 +1,70 @@
+var _____WB$wombat$assign$function_____=function(name){return (globalThis._wb_wombat && globalThis._wb_wombat.local_init && globalThis._wb_wombat.local_init(name))||globalThis[name];};if(!globalThis.__WB_pmw){globalThis.__WB_pmw=function(obj){this.__WB_source=obj;return this;}}{
+let window = _____WB$wombat$assign$function_____("window");
+let self = _____WB$wombat$assign$function_____("self");
+let document = _____WB$wombat$assign$function_____("document");
+let location = _____WB$wombat$assign$function_____("location");
+let top = _____WB$wombat$assign$function_____("top");
+let parent = _____WB$wombat$assign$function_____("parent");
+let frames = _____WB$wombat$assign$function_____("frames");
+let opener = _____WB$wombat$assign$function_____("opener");
+window.tp = window.tp || [];
+window.didomiOnReady = window.didomiOnReady || [];
+window.didomiEventListeners = window.didomiEventListeners || [];
+
+window.didomiEventListeners.push({
+    event: 'consent.changed',
+    listener: function (context) {
+        location.reload();
+    }
+});
+
+window.didomiOnReady.push(function (Didomi) { 
+    if (Didomi.isConsentRequired()) {
+        // Consent is required: your visitor is from the EU or you are an EU company
+        Didomi.getObservableOnUserConsentStatusForVendor('412') // Piano Software Inc.
+            .subscribe(function (consentStatusForVendor) {
+                if (consentStatusForVendor === true) {
+                    setPianoProductsMode('opt-in'); // all data will be saved
+                } else {
+                    setPianoProductsMode('opt-out'); // only mandatory cookies will be saved
+                }
+                console.log('status consent for vendor Piano Software Inc.: ', consentStatusForVendor);
+            });
+    } else {
+        // Consent is not required, enable your vendor immediately
+    }
+});
+
+function setPianoProductsMode(mode) {
+    tp.push(["init", function() {
+        tp.consent.set({DMP: {mode: mode}});
+        tp.consent.set({COMPOSER: {mode: mode}});
+        tp.consent.set({ID: {mode: mode}});
+        tp.consent.set({VX: {mode: mode}});
+        tp.consent.set({ESP: {mode: mode}});
+        //tp.experience.init();
+    }]);
+}
+}
+
+/*
+     FILE ARCHIVED ON 17:59:30 Jun 27, 2026 AND RETRIEVED FROM THE
+     INTERNET ARCHIVE ON 22:12:32 Jun 28, 2026.
+     JAVASCRIPT APPENDED BY WAYBACK MACHINE, COPYRIGHT INTERNET ARCHIVE.
+
+     ALL OTHER CONTENT MAY ALSO BE PROTECTED BY COPYRIGHT (17 U.S.C.
+     SECTION 108(a)(3)).
+*/
+/*
+playback timings (ms):
+  capture_cache.get: 0.434
+  captures_list: 0.597
+  exclusion.robots: 0.048
+  exclusion.robots.policy: 0.036
+  esindex: 0.01
+  cdx.remote: 108.93
+  LoadShardBlock: 81.747 (3)
+  PetaboxLoader3.datanode: 84.096 (4)
+  PetaboxLoader3.resolve: 212.159 (2)
+  load_resource: 228.174
+*/

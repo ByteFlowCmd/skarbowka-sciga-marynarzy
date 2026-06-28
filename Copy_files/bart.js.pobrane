@@ -1,0 +1,425 @@
+var _____WB$wombat$assign$function_____=function(name){return (globalThis._wb_wombat && globalThis._wb_wombat.local_init && globalThis._wb_wombat.local_init(name))||globalThis[name];};if(!globalThis.__WB_pmw){globalThis.__WB_pmw=function(obj){this.__WB_source=obj;return this;}}{
+let window = _____WB$wombat$assign$function_____("window");
+let self = _____WB$wombat$assign$function_____("self");
+let document = _____WB$wombat$assign$function_____("document");
+let location = _____WB$wombat$assign$function_____("location");
+let top = _____WB$wombat$assign$function_____("top");
+let parent = _____WB$wombat$assign$function_____("parent");
+let frames = _____WB$wombat$assign$function_____("frames");
+let opener = _____WB$wombat$assign$function_____("opener");
+/* bart.js */
+(function(w,d){
+var _BART = function(){
+if (typeof document.getElementById === 'undefined'){ return false;}
+var A = Array.prototype.slice.call(arguments);
+var C = A.shift();
+if (typeof _BART[C] === 'function'){_BART[C].apply(null,A);}
+else {_BART.log('_BART: functionality for ',C,'not found');}    
+};
+
+_BART.version = '1.0.2019-06-14a';
+
+_BART.groupId = '';
+_BART.userId = '';
+_BART.requestId = '';
+_BART.siteId = '';
+_BART.enableIp = '';
+_BART.last_article = '';
+_BART.debug = false;
+_BART.baseurl = 'https://web.archive.org/web/20260628134617/https://bonnieraws.dergan.net';
+_BART.log = function(){
+  if (_BART.debug){
+    console.log.apply('null',arguments);
+  }
+}
+_BART.init = function(){
+  var opts = arguments[0];
+  _BART('log','bart init with',_BART.stringify(opts));
+  var a = ['groupId','userId','requestId','siteId','enableIp','debug','banner_pre_hook' ]
+  for (var i in a){
+    var one = a[i];
+    if (one in opts){ _BART[one] = opts[one]; _BART.log('set '+one, _BART[one]);}
+  }
+}
+_BART.procq = function(){
+        if (typeof _BART.q !== "object" || !_BART.q){ return;}
+        while (_BART.q.length){
+            var o = _BART.q.shift();
+            _BART.log('q:',o);
+            _BART.apply(null,o);
+        }
+}
+_BART.stringify = function(obj){
+   var j="";
+   if (typeof JSON !== "object" || typeof JSON.stringify !== "function"){
+     var c=0;
+     var l=0; for (var i in obj){ l++;}
+     j = "{";
+     for (var i in obj){
+       j += "\"" + i + "\":\"" +  obj[i].replace(/\\([\s\S])|(")/, "\\$1$2") + "\"";
+       c++;
+       if (c < l){  j += ",";}
+     }
+     j += "}";
+  }
+  else { j = JSON.stringify(obj);}
+  return j;
+}
+_BART.getUrlParameter = function(name) {
+  name = name.replace(/[\[]/, '\\[').replace(/[\]]/, '\\]');
+  var regex = new RegExp('[\\?&]' + name + '=([^&#]*)');
+  var results = regex.exec(location.search);
+  return results === null ? '' : decodeURIComponent(results[1].replace(/\+/g, ' '));
+}
+_BART.setCookie = function(name,value,seconds){
+  var expires = "";
+  var domain = "";
+  if (seconds) {
+    var date = new Date();
+    date.setTime(date.getTime() + (seconds*1000));
+    domain = "; domain=." + location.hostname.split('.').reverse()[1] + '.' + location.hostname.split('.').reverse()[0]
+    expires = "; expires=" + date.toUTCString();
+  }
+  document.cookie = name + "=" + (value || "")  + domain + expires + "; path=/";
+}
+_BART.getCookie = function(name){
+  var nameEQ = name + "=";
+  var ca = document.cookie.split(';');
+  for(var i=0;i < ca.length;i++) {
+  var c = ca[i];
+  while (c.charAt(0)==' ') c = c.substring(1,c.length);
+    if (c.indexOf(nameEQ) == 0) return c.substring(nameEQ.length,c.length);
+  }
+  return null;
+}
+_BART.eraseCookie = function(name){
+  document.cookie = name+'=; Max-Age=-99999999;';
+}
+_BART.push = function(ept,obj,f){
+  if (typeof obj === "undefined"){ return false;}
+  if (typeof ept !== "string"){ return false;}
+  if (ept[0] !== "/"){ ept = "/"+ept;}
+  // add the bart campaign cookie, if any, to bartma_* markers
+  var bc = 0;
+  bc = _BART.getCookie('BARTcampaign');
+  obj.BARTcampaign = bc ? bc : 0;
+  if (
+    typeof obj.event_param1 === "undefined"
+    && typeof obj.marker !== "undefined"
+    && obj.marker.indexOf('bartma_') == 0
+  ){
+    obj.event_param1 = bc; // yes, it's ugly
+  }
+  // add the bart last-seen-article, if any, to bartma_* markers
+  var ac = "";
+  if (typeof obj.marker !== "undefined" && obj.marker == "article_read" && typeof obj.articleId !== "undefined"){
+    // we're in this article
+    _BART('setCookie','BARTarticle',obj.articleId,6*60*60);
+    _BART.last_article = obj.articleId;
+  }
+  if (!ac){ ac = _BART.last_article;}
+  if (!ac){ ac = _BART.getCookie('BARTarticle');} // maybe it already existed
+  obj.BARTarticle = ac ? ac : "";
+  // proceed with regular stuff
+  if (!('userId' in obj)){ obj.userId = _BART.userId;}
+  if (!('enableIp' in obj)){ obj.enableIp = _BART.enableIp;}
+  if (!('requestId' in obj)){ obj.requestId = _BART.requestId;}
+  if (!('siteId' in obj)){ obj.siteId = _BART.siteId;}
+  var width = window.innerWidth || document.documentElement.clientWidth || document.body.clientWidth;
+  var height = window.innerHeight || document.documentElement.clientHeight || document.body.clientHeight;
+  if (!('width' in obj)){ obj.width = width; }
+  if (!('height' in obj)){ obj.height = height; }
+  obj._version = _BART.version; // c0w 2019-04-25
+  try { var xhr = new XMLHttpRequest();}
+  catch (e){ return false;}
+  var url = _BART.baseurl + ept;
+  xhr.open("POST",url+"?group=" + _BART.groupId, true);
+  xhr.setRequestHeader("Content-Type", "application/json; charset=UTF-8");
+  var j = typeof obj === "string" ? obj : _BART.stringify(obj);
+  if (typeof f === "function"){
+    xhr.addEventListener("load",f);
+  }
+  else {
+    xhr.addEventListener("load",_BART.callback_proc);
+  }
+  xhr.send(j);
+  return true;
+}
+_BART.proclinks = function(){
+  if ("querySelectorAll" in document){
+    var bart_dbc = document.querySelectorAll('a[data-bart-campaign]');
+    _BART.log('BART processing of [data-bart-campaign] links',bart_dbc);
+    for (var i in bart_dbc){ if (bart_dbc.hasOwnProperty(i)){
+      bart_dbc[i].addEventListener('click',function(e){
+        e.preventDefault();
+        var atr = this.getAttribute('data-bart-campaign');
+        var url = this.getAttribute('href');
+        _BART.setCookie('BARTcampaign',atr,1*24*60*60); // 1 day
+        var c = {
+          marker: "bartma_click",
+          url: window.location.href,
+          event_param1: atr
+        };
+        var ac = "";
+        if (!ac){ ac = _BART.last_article;}
+        if (!ac){ ac = _BART.getCookie('BARTarticle');} // maybe it already existed
+        c.articleId = ac ? ac : "";
+        _BART.push('/event',c,function(){
+          if (this.readyState == 4){
+            _BART.log('BART click send complete');
+            window.location.href=url;
+          }
+        });
+      });
+    }}
+  }
+  else {
+    _BART.log('BART: no querySelectorAll');
+  }
+}
+
+_BART.banner_postproc = function(bnr,bdiv,bparent){
+  // the #bart_banner element is already present
+  // send in the display event
+  if(typeof bdiv === 'undefined' || !bdiv){
+    _BART.log('BART banner div not found - something is wrong');
+    return false;
+  }
+  _BART.log('BART postprocessing',bdiv);
+  if (typeof bnr.css !== 'undefined' && bnr.css){
+    // insert css on the fly into the proper parent
+    var css = bparent.createElement("style");
+    css.type = "text/css";
+    css.id = "bart_css";
+    css.innerHTML = bnr.css;
+    bparent.head.appendChild(css);
+    _BART.log('BART added css',bnr.css,css);
+  }
+  // center if tpl==2
+  switch (bnr.tpl){
+        case 2:
+          xs = bdiv.clientWidth;
+          ys = bdiv.clientHeight;
+          var width = window.innerWidth || document.documentElement.clientWidth || document.body.clientWidth;
+          var height = window.innerHeight || document.documentElement.clientHeight || document.body.clientHeight;
+          bdiv.style.cssText += "top:"+Math.round((height-ys)/2)+"px;left:"+Math.round((width-xs)/2)+"px;";
+        break;
+  }
+  // dial home
+   var c = {
+    marker: "bartma_imp",
+    url: window.location.href,
+    articleId: bnr.guid || "",
+    event_param1: bnr.campaign || 0,
+    event_param2: bnr.id
+  };
+  _BART.push('/event',c,function(){
+    if (this.readyState == 4){
+      _BART.log('BART impression send complete');
+    }
+  });
+  // end dial home
+  var dis = "";
+  if (typeof bnr.display !== "undefined"){
+    dis = bnr.display;
+  }
+  switch (dis){ // display methods
+    default:
+      bdiv.classList.add('bart-fade-in');
+    break;
+  }
+  var bartclose = bparent.getElementById('bart_banner_close');
+  if (typeof bartclose !== 'undefined' && bartclose){
+    bartclose.addEventListener('click',function(e){
+      try { bdiv.parentNode.removeChild(bdiv); } catch(err){};
+      if (typeof e.stopPropagation != "undefined") {
+        e.stopPropagation();
+      } else if (typeof e.cancelBubble != "undefined") {
+        e.cancelBubble = true;
+      }
+      return false;
+    });
+  }
+  if (typeof bnr.url !== "undefined" && bnr.url){
+    bdiv.addEventListener('click',function(){
+      // set cookie "active in campaign X"
+      _BART.setCookie('BARTcampaign',bnr.campaign,1*24*60*60); // 1 day
+      // send in the click event
+      var c = {
+        marker: "bartma_click",
+        url: window.location.href,
+        event_param1: bnr.campaign || 0,
+        event_param2: bnr .id
+      };
+      var ac = "";
+      if (!ac){ ac = _BART.last_article;}
+      if (!ac){ ac = _BART.getCookie('BARTarticle');} // maybe it already existed
+      c.articleId = ac ? ac : "";
+      _BART.push('/event',c,function(){
+        if (this.readyState == 4){
+          _BART.log('BART click send complete');
+          window.location.href=bnr.url;
+        }
+      });
+    });
+  }
+  if (typeof bnr.autoclose !== "undefined"){
+    var ac = parseInt(bnr.autoclose);
+    if (ac > 0){
+      window.setTimeout(function(){ 
+        bdiv.classList.remove('bart-fade-in');
+        bdiv.classList.add('bart-fade-out');
+      },ac);
+      window.setTimeout(function(){
+        try { bdiv.parentNode.removeChild(bdiv); } catch(err){};
+      },ac+1000);
+    }
+  }
+} // _BART.banner_postproc
+
+_BART.callback_proc = function(){
+  _BART.log('in callback proc',arguments);
+  var bart = false;
+  try {
+    bart = JSON.parse(arguments[0].target.responseText);
+  }
+  catch(e){
+    _BART.log('JSON parse error on response text',e);
+    return;
+  }
+
+  if (typeof _BART.banner_pre_hook === 'function'){
+    _BART.banner_pre_hook(bart); // maybe call DFP and let it know this user has a BART banner ready
+  }
+
+  _BART.log('BART decoded',bart);
+  if (typeof bart.banner === 'undefined' || !(bart.banner)){
+    _BART.log('BART has no banner');
+    return;
+  }
+  var banner = bart.banner;
+  _BART.log('BART has a banner',banner);
+  if (typeof _BART.userId === "undefined" || !(_BART.userId)){
+    _BART.log('BART exists - disabled for current user',_BART.userId);
+    return;
+  }
+  _BART.log('BART processing of banner');
+  var html = '';
+  if (typeof banner.tpl !== 'undefined'){ switch (banner.tpl){
+    default:
+      html = banner.text1;    
+    break;  
+  }}
+  var width = window.innerWidth
+    || document.documentElement.clientWidth
+    || document.body.clientWidth;
+  var height = window.innerHeight
+    || document.documentElement.clientHeight
+    || document.body.clientHeight;
+  if (html){
+    var div = document.createElement("div");
+    div.id = "bart_banner";
+    div.innerHTML = html;
+    div.innerHTML += "<span id='bart_banner_close'>x</span>";
+    if (banner.background !== "undefined" && banner.background){
+      div.style.cssText += "background:"+banner.background+";";
+    }
+    if (banner.color !== "undefined" && banner.color){
+      div.style.cssText += "color:"+banner.color+";";
+    }
+    
+    // faky fake
+//    banner.tpl = 4;
+//    banner.dom_id = '';
+    // end faky fake
+
+    div.classList.add('tpl_' + parseInt(banner.tpl));
+    
+    if (banner.tpl == 4){ // banner should reside inside a page element?
+      var bh = document.getElementById( typeof banner.dom_id !== 'undefined' && banner.dom_id ? banner.dom_id : "bart_banner_holder");
+      if (typeof bh !== "undefined" && bh){
+        bh.appendChild(div);
+      }
+      else {
+        // start listening - the old way (no mutationobserver)
+        _BART.check_banner_display = function(elt,bnr){
+        var bh = document.getElementById( typeof bnr.dom_id !== 'undefined' && bnr.dom_id ? bnr.dom_id : "bart_banner_holder");
+          // maybe we need to check holder visibility? ?? TODO
+          // maybe we will also need to look inside iframes ?? TODO
+          var bp = null;
+          if (typeof bh !== 'undefined' && bh){
+            bp = document;  
+          }
+          if (typeof bh === 'undefined' || !bh){
+            // look inside iframes
+            var ifr = window.document.getElementsByTagName("iframe");
+            if (ifr){ for (var j in ifr){
+              var tif = ifr[j];
+              var ctif = null;
+              try { // mind the xdomain exceptions
+                ctif = tif.contentDocument;
+              } catch(ex){
+                _BART.log('bart exception',ex);
+              }
+              if (typeof ctif !== 'undefined' && ctif){
+                bh = ctif.getElementById(typeof bnr.dom_id !== 'undefined' && bnr.dom_id ? bnr.dom_id : "bart_banner_holder");
+                if (typeof bh !== "undefined" && bh){
+                  bp = ctif;
+                  break;
+                } // stop looking if found
+              }
+            }}  
+          }
+          if (typeof bh !== "undefined" && bh){
+            bh.insertBefore(elt,bh.firstChild);
+            clearInterval(_BART.listener);
+            _BART.banner_postproc(bnr,elt,bp);
+          }
+        }
+        _BART.listener = setInterval(function(){
+          _BART.check_banner_display(div,banner,document);        
+        },500);
+      }
+    }
+    else {
+      document.body.appendChild(div);
+      _BART.banner_postproc(banner,div,document);
+    }
+  }
+};
+
+_BART.loadtime = 1*new Date();
+_BART.log('BART ' + _BART.version + ' is here');
+if (typeof w._BART !== "undefined"){
+  _BART.log('BART found an existing object in window',w._BART);
+  _BART.q = w._BART.q;
+  _BART('procq');
+}
+w._BART = _BART;
+w._BART('procq');
+d.addEventListener("DOMContentLoaded", function(){ w._BART('proclinks'); });
+})(window,document);
+
+}
+
+/*
+     FILE ARCHIVED ON 13:46:17 Jun 28, 2026 AND RETRIEVED FROM THE
+     INTERNET ARCHIVE ON 22:09:48 Jun 28, 2026.
+     JAVASCRIPT APPENDED BY WAYBACK MACHINE, COPYRIGHT INTERNET ARCHIVE.
+
+     ALL OTHER CONTENT MAY ALSO BE PROTECTED BY COPYRIGHT (17 U.S.C.
+     SECTION 108(a)(3)).
+*/
+/*
+playback timings (ms):
+  capture_cache.get: 4.144
+  captures_list: 0.674
+  exclusion.robots: 0.059
+  exclusion.robots.policy: 0.046
+  esindex: 0.009
+  cdx.remote: 91.56
+  LoadShardBlock: 255.234 (6)
+  PetaboxLoader3.datanode: 272.399 (8)
+  PetaboxLoader3.resolve: 85.887 (3)
+  load_resource: 173.071 (2)
+*/
